@@ -7,4 +7,8 @@ while True:
     if user_input.lower() == "quit":
         break
 
+    if not user_input.lstrip('-').isdigit():
+        print("Invalid input. Please enter a number.")
+        continue
+    
     stock_quantity = int(user_input)
