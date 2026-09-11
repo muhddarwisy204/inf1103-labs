@@ -18,4 +18,8 @@ while True:
         continue
 
     total_inventory += stock_quantity
+
+    if total_inventory > 500:
+        print(f"Error: Exceeded inventory of 500 with {total_inventory} units!")
+        break
     
