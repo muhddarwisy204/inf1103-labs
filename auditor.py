@@ -16,3 +16,6 @@ while True:
     if stock_quantity < 0:
         print("Invalid input. Negative values are not allowed ")
         continue
+
+    total_inventory += stock_quantity
+    
