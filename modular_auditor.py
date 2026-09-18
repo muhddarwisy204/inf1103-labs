@@ -1,6 +1,23 @@
 total_inventory = 0
 rejected_entries = 0
 
+def get_valid_input():
+    user_input = input("Enter stock quantity (or 'quit' to exit): ").strip()
+
+    if user_input.lower() == "quit":
+        return 'quit'
+
+    if not user_input.lstrip('-').isdigit():
+        print("Error: Invalid input. Please enter a number.")
+        return None
+
+    quantity = int(user_input)
+    if quantity < 0:
+        print("Error: Negative values are not allowed.")
+        return None
+
+    return quantity
+
 while True:
     user_input = input("Enter stock quantity (or 'quit' to exit): ").strip()
     
