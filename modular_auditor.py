@@ -18,6 +18,12 @@ def get_valid_input():
 
     return quantity
 
+def process_delivery(current_total, new_value):
+    return current_total + new_value
+
+def calculate_tax(amount):
+    return amount * 0.10
+
 while True:
     user_input = input("Enter stock quantity (or 'quit' to exit): ").strip()
     
