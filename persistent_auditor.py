@@ -12,6 +12,16 @@ def load_inventory(filename="inventory.txt"):
 
     return history
 
+def save_inventory(history, filename="inventory.txt"):
+    try:
+        with open(filename, "w") as file:
+            for item in history:
+                file.write(f"{item}\n")
+        print(f"Transaction history successfully saved to {filename}.")
+    except IOError as e:
+        print(f"Error saving inventory to {filename}: {e}")
+
+
 def get_valid_input():
     user_input = input("Enter stock quantity (or 'quit' to exit): ").strip()
 
@@ -48,6 +58,8 @@ def main():
     total_tax = sum(calculate_tax(amt) for amt in transaction_history)
     rejected_entries = 0
 
+    print(f"Current Starting Inventory Total: {total_inventory} units \n")
+
     while True:
         
         stock_quantity = get_valid_input()
@@ -74,6 +86,7 @@ def main():
 
 
     generate_report(total_inventory, rejected_entries, total_tax)
+    save_inventory(transaction_history)
 
 if __name__ == "__main__":
     main()
