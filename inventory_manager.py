@@ -47,11 +47,80 @@ def display_all(inventory):
             print(f"ID: {product['id']} | Name: {product['name']} | Price: ${product['price']:.2f} | Stock: {product['stock']}")
     print("----------------------------------------")
 
+def add_product(inventory):
+    #Prompts user for product details and adds a new product dictionary to inventory
+    print("\nAdd New Product")
+    product_id = input("Product ID: ").strip()
+
+    #Check for duplicate ID
+    for product in inventory:
+        if product["id"].lower() == product_id.lower():
+            print("\nError: Product ID already exists!")
+            return
+
+    name = input("Product Name: ").strip()
+    try:
+        price = float(input("Price: "))
+        stock = int(input("Stock Quantity: "))
+    except ValueError:
+        print("\nError: Invalid numeric input for price or stock")
+        return
+
+    new_product = {
+        "id": product_id,
+        "name": name,
+        "price": price,
+        "stock": stock
+    }
+
+    inventory.append(new_product)
+    print("\nProduct added successfully!")
+
+def update_stock(inventory):
+    #Searches for a prodcut by ID and updates its stock quantity
+    print("\nUpdate Stock")
+    product_id = input("Enter Product ID: ").strip()
+
+    for product in inventory:
+        if product["id"].lower() == product_id.lower():
+            print(f"\nProduct Found:")
+            print(f"Name: {product['name']}")
+            print(f"Current Stock: {product['stock']}\n")
+
+            try:
+                new_stock = int(input("New Stock Quantity: "))
+                product["stock"] = new_stock
+                print("\nStock updated successfully!")
+            except ValueError:
+                print("\nError: Invalid input for stock quantity.")
+            return
+        
+    print("\nProduct not found.")
+
+
+def search_product(inventory):
+    #Searches for a product by ID and displays its complete details.
+    print("\nSearch Product")
+    product_id = input("Enter Product ID: ").strip()
+
+    for product in inventory:
+        if product["id"].lower() == product_id.lower():
+            print("\nProduct Found")
+            print("----------------------------------------")
+            print(f"ID: {product['id']}")
+            print(f"Name: {product['name']}")
+            print(f"Price: ${product['price']:.2f}")
+            print(f"Stock: {product['stock']}")
+            print("----------------------------------------")
+            return
+
+    print("\nProduct not found.")
+
+
+            
 def main():
-    #Test loading and saving functions
     inventory = load_inventory()
     display_all(inventory)
-    save_inventory(inventory)
 
 if __name__ == "__main__":
     main()
