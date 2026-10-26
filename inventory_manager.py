@@ -52,6 +52,43 @@ class Product:
             "stock": self.__stock
         }
 
+# ==========================================
+# 2. INVENTORY CLASS
+# Responsibility: Manage a collection of Product objects
+# ==========================================
+class Inventory:
+    def __init__(self):
+        # Internal list storing Product objects
+        self.__products = []
+
+    def add_product(self, product: Product) -> None:
+        """Adds a Product object to the inventory collection."""
+        self.__products.append(product)
+
+    def search_product(self, product_id: str):
+        """Searches for a product by ID (case-insensitive) and returns the Product object or None."""
+        for product in self.__products:
+            if product.get_product_id().lower() == product_id.strip().lower():
+                return product
+        return None
+
+    def display_all(self) -> None:
+        """Displays all products in the inventory."""
+        print("\nCurrent Inventory")
+        print("------------------------------------------------")
+        if not self.__products:
+            print("No products available in inventory.")
+        else:
+            for product in self.__products:
+                # Delegate printing to the Product object itself!
+                product.display_information()
+        print("------------------------------------------------")
+
+    def get_all_products(self) -> list:
+        """Returns the list of Product objects."""
+        return self.__products
+
+
 
 def load_inventory(filename="inventory.json"):
     '''
