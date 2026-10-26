@@ -132,27 +132,18 @@ def save_inventory(inventory: Inventory, filename="inventory.json") -> None:
         print(f"Error saving inventory to {filename}: {e}")
 
 
-def display_all(inventory):
-    #Displays all products currently in the inventory list
-    print("\nCurrent Inventory")
-    print("----------------------------------------")
-    if not inventory:
-        print("No products available in inventory.")
-    else:
-        for product in inventory:
-            print(f"ID: {product['id']} | Name: {product['name']} | Price: ${product['price']:.2f} | Stock: {product['stock']}")
-    print("----------------------------------------")
-
-def add_product(inventory):
-    #Prompts user for product details and adds a new product dictionary to inventory
+# ==========================================
+# 4. MENU ACTIONS & USER INTERACTION
+# Responsibility: Prompt user and call Inventory / Product methods
+# ==========================================
+def add_product_action(inventory: Inventory) -> None:
     print("\nAdd New Product")
     product_id = input("Product ID: ").strip()
 
-    #Check for duplicate ID
-    for product in inventory:
-        if product["id"].lower() == product_id.lower():
-            print("\nError: Product ID already exists!")
-            return
+    # Use Inventory search to check duplicate ID
+    if inventory.search_product(product_id) is not None:
+        print("\nError: Product ID already exists!")
+        return
 
     name = input("Product Name: ").strip()
     try:
@@ -162,88 +153,82 @@ def add_product(inventory):
         print("\nError: Invalid numeric input for price or stock")
         return
 
-    new_product = {
-        "id": product_id,
-        "name": name,
-        "price": price,
-        "stock": stock
-    }
-
-    inventory.append(new_product)
+    # Create Product object and store in Inventory
+    new_product = Product(product_id, name, price, stock)
+    inventory.add_product(new_product)
     print("\nProduct added successfully!")
 
-def update_stock(inventory):
-    #Searches for a prodcut by ID and updates its stock quantity
+
+def update_stock_action(inventory: Inventory) -> None:
     print("\nUpdate Stock")
     product_id = input("Enter Product ID: ").strip()
 
-    for product in inventory:
-        if product["id"].lower() == product_id.lower():
-            print(f"\nProduct Found:")
-            print(f"Name: {product['name']}")
-            print(f"Current Stock: {product['stock']}\n")
+    product = inventory.search_product(product_id)
+    if product:
+        print(f"\nProduct Found:")
+        print(f"Name: {product.get_name()}")
+        print(f"Current Stock: {product.get_stock()}\n")
 
-            try:
-                new_stock = int(input("New Stock Quantity: "))
-                product["stock"] = new_stock
-                print("\nStock updated successfully!")
-            except ValueError:
-                print("\nError: Invalid input for stock quantity.")
-            return
-        
-    print("\nProduct not found.")
+        try:
+            new_stock = int(input("New Stock Quantity: "))
+            # Product updates its own state
+            product.update_stock(new_stock)
+            print("\nStock updated successfully!")
+        except ValueError:
+            print("\nError: Invalid input for stock quantity.")
+    else:
+        print("\nProduct not found.")
 
 
-def search_product(inventory):
-    #Searches for a product by ID and displays its complete details.
+def search_product_action(inventory: Inventory) -> None:
     print("\nSearch Product")
     product_id = input("Enter Product ID: ").strip()
 
-    for product in inventory:
-        if product["id"].lower() == product_id.lower():
-            print("\nProduct Found")
-            print("----------------------------------------")
-            print(f"ID: {product['id']}")
-            print(f"Name: {product['name']}")
-            print(f"Price: ${product['price']:.2f}")
-            print(f"Stock: {product['stock']}")
-            print("----------------------------------------")
-            return
+    product = inventory.search_product(product_id)
+    if product:
+        print("\nProduct Found")
+        print("------------------------------------------------")
+        print(f"ID: {product.get_product_id()}")
+        print(f"Name: {product.get_name()}")
+        print(f"Price: ${product.get_price():.2f}")
+        print(f"Stock: {product.get_stock()}")
+        print("------------------------------------------------")
+    else:
+        print("\nProduct not found.")
 
-    print("\nProduct not found.")
 
-
-            
+# ==========================================
+# 5. MAIN APPLICATION LOOP
+# ==========================================
 def main():
     print("========================================")
     print("INVENTORY MANAGEMENT SYSTEM")
     print("========================================")
 
-    #Load inventory at startup
+    # Load inventory at startup
     inventory = load_inventory()
 
     while True:
-        print("\n---------- MENU ----------")
+        print("\n----------- MENU -----------")
         print("1. Display All Products")
         print("2. Add Product")
         print("3. Update Stock")
         print("4. Search Product")
         print("5. Save Inventory")
         print("6. Exit")
-        print("--------------------------")
+        print("----------------------------")
 
         choice = input("\nEnter option: ").strip()
 
         if choice == '1':
-            display_all(inventory)
+            inventory.display_all()
         elif choice == '2':
-            add_product(inventory)
+            add_product_action(inventory)
         elif choice == '3':
-            update_stock(inventory)
+            update_stock_action(inventory)
         elif choice == '4':
-            search_product(inventory)
+            search_product_action(inventory)
         elif choice == '5':
-            print("\nSaving inventory...")
             save_inventory(inventory)
         elif choice == '6':
             print("\nSaving inventory before exit...")
@@ -253,6 +238,7 @@ def main():
             break
         else:
             print("\nInvalid option. Please enter a number from 1 to 6.")
+
 
 if __name__ == "__main__":
     main()
