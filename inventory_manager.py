@@ -90,30 +90,43 @@ class Inventory:
 
 
 
-def load_inventory(filename="inventory.json"):
-    '''
-    Loads inventory data from a JSON file.
-    If the file does not existm returns the default inventory list.
-    '''
+# ==========================================
+# 3. FILE HANDLING
+# Responsibility: Load and save inventory data
+# ==========================================
+def load_inventory(filename="inventory.json") -> Inventory:
+    """Loads inventory data from a JSON file into an Inventory object."""
+    inventory = Inventory()
     try:
         with open(filename, "r") as file:
-            inventory = json.load(file)
+            data = json.load(file)
             print(f"\n{filename} found.")
             print("Inventory loaded successfully.")
+            for item in data:
+                product = Product(item["id"], item["name"], item["price"], item["stock"])
+                inventory.add_product(product)
             return inventory
     except FileNotFoundError:
         print(f"\n'{filename}' not found. Initializing with default inventory.")
-        return DEFAULT_INVENTORY
+        for item in DEFAULT_INVENTORY:
+            product = Product(item["id"], item["name"], item["price"], item["stock"])
+            inventory.add_product(product)
+        return inventory
     except json.JSONDecodeError:
         print(f"\nError decoding '{filename}'. Starting with default inventory.")
-        return DEFAULT_INVENTORY
+        for item in DEFAULT_INVENTORY:
+            product = Product(item["id"], item["name"], item["price"], item["stock"])
+            inventory.add_product(product)
+        return inventory
 
-def save_inventory(inventory, filename="inventory.json"):
-    #Saves the current inventory list to a JSON file.
+
+def save_inventory(inventory: Inventory, filename="inventory.json") -> None:
+    """Saves the Product objects from Inventory to a JSON file."""
     try:
         print("\nSaving inventory...")
+        data = [product.to_dict() for product in inventory.get_all_products()]
         with open(filename, "w") as file:
-            json.dump(inventory, file, indent=4)
+            json.dump(data, file, indent=4)
         print(f"Inventory saved successfully to {filename}.")
     except IOError as e:
         print(f"Error saving inventory to {filename}: {e}")
