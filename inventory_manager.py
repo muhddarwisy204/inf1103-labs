@@ -2,11 +2,11 @@ import json
 from abc import ABC, abstractmethod
 
 
-#Default fallback list if inventory.json does not exist yet
+# Default fallback list showcasing both physical and digital products
 DEFAULT_INVENTORY = [
-    {"id": "P001", "name": "Laptop", "price": 1200.00, "stock": 15},
-    {"id": "P002", "name": "Mouse", "price": 25.50, "stock": 40},
-    {"id": "P003", "name": "Keyboard", "price": 45.00, "stock": 25}
+    {"id": "P001", "name": "Laptop", "price": 1200.00, "stock": 15, "type": "physical", "weight": 2.5},
+    {"id": "P002", "name": "Mouse", "price": 25.50, "stock": 40, "type": "physical", "weight": 0.2},
+    {"id": "P003", "name": "Python Mastery E-Book", "price": 29.99, "stock": 100, "type": "digital", "download_size": 15.0}
 ]
 
 # ==========================================
@@ -165,7 +165,7 @@ class Inventory:
 # Responsibility: Load and save inventory data
 # ==========================================
 def load_inventory(filename="inventory.json") -> Inventory:
-    """Loads inventory data from a JSON file into an Inventory object."""
+    """Loads inventory data from JSON, instantiating proper subclasses."""
     inventory = Inventory()
     try:
         with open(filename, "r") as file:
@@ -173,19 +173,33 @@ def load_inventory(filename="inventory.json") -> Inventory:
             print(f"\n{filename} found.")
             print("Inventory loaded successfully.")
             for item in data:
-                product = Product(item["id"], item["name"], item["price"], item["stock"])
+                prod_type = item.get("type", "physical").lower()
+                if prod_type == "digital":
+                    product = DigitalProduct(
+                        item["id"], item["name"], item["price"], item["stock"], item.get("download_size", 10.0)
+                    )
+                else:
+                    product = PhysicalProduct(
+                        item["id"], item["name"], item["price"], item["stock"], item.get("weight", 1.0)
+                    )
                 inventory.add_product(product)
             return inventory
     except FileNotFoundError:
         print(f"\n'{filename}' not found. Initializing with default inventory.")
         for item in DEFAULT_INVENTORY:
-            product = Product(item["id"], item["name"], item["price"], item["stock"])
+            if item["type"] == "digital":
+                product = DigitalProduct(item["id"], item["name"], item["price"], item["stock"], item["download_size"])
+            else:
+                product = PhysicalProduct(item["id"], item["name"], item["price"], item["stock"], item["weight"])
             inventory.add_product(product)
         return inventory
     except json.JSONDecodeError:
         print(f"\nError decoding '{filename}'. Starting with default inventory.")
         for item in DEFAULT_INVENTORY:
-            product = Product(item["id"], item["name"], item["price"], item["stock"])
+            if item["type"] == "digital":
+                product = DigitalProduct(item["id"], item["name"], item["price"], item["stock"], item["download_size"])
+            else:
+                product = PhysicalProduct(item["id"], item["name"], item["price"], item["stock"], item["weight"])
             inventory.add_product(product)
         return inventory
 
@@ -210,7 +224,6 @@ def add_product_action(inventory: Inventory) -> None:
     print("\nAdd New Product")
     product_id = input("Product ID: ").strip()
 
-    # Use Inventory search to check duplicate ID
     if inventory.search_product(product_id) is not None:
         print("\nError: Product ID already exists!")
         return
@@ -220,11 +233,32 @@ def add_product_action(inventory: Inventory) -> None:
         price = float(input("Price: "))
         stock = int(input("Stock Quantity: "))
     except ValueError:
-        print("\nError: Invalid numeric input for price or stock")
+        print("\nError: Invalid numeric input for price or stock.")
         return
 
-    # Create Product object and store in Inventory
-    new_product = Product(product_id, name, price, stock)
+    print("Select Product Type:")
+    print("1. Physical Product")
+    print("2. Digital Product")
+    prod_type_choice = input("Enter choice (1 or 2): ").strip()
+
+    if prod_type_choice == '1':
+        try:
+            weight = float(input("Weight (kg): "))
+            new_product = PhysicalProduct(product_id, name, price, stock, weight)
+        except ValueError:
+            print("\nError: Invalid weight input.")
+            return
+    elif prod_type_choice == '2':
+        try:
+            download_size = float(input("Download Size (MB): "))
+            new_product = DigitalProduct(product_id, name, price, stock, download_size)
+        except ValueError:
+            print("\nError: Invalid download size input.")
+            return
+    else:
+        print("\nInvalid choice. Product not added.")
+        return
+
     inventory.add_product(new_product)
     print("\nProduct added successfully!")
 
@@ -262,6 +296,18 @@ def search_product_action(inventory: Inventory) -> None:
         print(f"Name: {product.get_name()}")
         print(f"Price: ${product.get_price():.2f}")
         print(f"Stock: {product.get_stock()}")
+
+        # Polymorphic behavior depending on subclass type
+        if isinstance(product, PhysicalProduct):
+            print(f"Type: Physical Product")
+            print(f"Weight: {product.get_weight():.1f} kg")
+            print(f"Estimated Shipping Cost: ${product.calculate_shipping_cost():.2f}")
+        elif isinstance(product, DigitalProduct):
+            print(f"Type: Digital Product")
+            print(f"Download Size: {product.get_download_size():.1f} MB")
+
+        # Calls overridden get_fulfilment_info()
+        print(f"Fulfilment Info: {product.get_fulfilment_info()}")
         print("------------------------------------------------")
     else:
         print("\nProduct not found.")
