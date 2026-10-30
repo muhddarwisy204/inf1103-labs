@@ -1,4 +1,6 @@
 import json
+from abc import ABC, abstractmethod
+
 
 #Default fallback list if inventory.json does not exist yet
 DEFAULT_INVENTORY = [
@@ -8,30 +10,37 @@ DEFAULT_INVENTORY = [
 ]
 
 # ==========================================
+# 0. INTERFACE: CanBeShipped
+# Defines capability contract for shippable items
+# ==========================================
+class CanBeShipped(ABC):
+    @abstractmethod
+    def calculate_shipping_cost(self) -> float:
+        """Calculates shipping cost based on product characteristics."""
+        pass
+
+
+
+# ==========================================
 # 1. PRODUCT CLASS
 # Responsibility: Represent and manage a single product
 # ==========================================
-class Product:
+class Product(ABC):
     def __init__(self, product_id: str, name: str, price: float, stock: int):
-        # Private attributes
         self.__product_id = str(product_id)
         self.__name = str(name)
         self.__price = float(price)
         self.__stock = int(stock)
 
     def update_stock(self, quantity: int) -> None:
-        """Updates stock quantity with validation."""
         if quantity >= 0:
             self.__stock = quantity
         else:
             print("Stock cannot be negative.")
 
     def display_information(self) -> None:
-        """Displays product base details without trailing newline."""
         print(f"ID: {self.__product_id} | Name: {self.__name} | Price: ${self.__price:.2f} | Stock: {self.__stock}", end="")
 
-
-    # Public getters 
     def get_product_id(self) -> str:
         return self.__product_id
 
@@ -45,7 +54,6 @@ class Product:
         return self.__stock
 
     def to_dict(self) -> dict:
-        """Converts Product object back to dictionary for JSON saving."""
         return {
             "id": self.__product_id,
             "name": self.__name,
@@ -53,27 +61,38 @@ class Product:
             "stock": self.__stock
         }
 
+    @abstractmethod
+    def get_fulfilment_info(self) -> str:
+        """Abstract method: Subclasses must provide fulfillment details."""
+        pass
+
 
 # ==========================================
 # 2. SUBCLASSES: INHERITANCE & METHOD OVERRIDING
 # ==========================================
-class PhysicalProduct(Product):
+class PhysicalProduct(Product, CanBeShipped):
     def __init__(self, product_id: str, name: str, price: float, stock: int, weight: float):
-        # Reuse parent constructor
         super().__init__(product_id, name, price, stock)
-        # Unique attribute for physical items (in kg)
         self.__weight = float(weight)
 
     def get_weight(self) -> float:
         return self.__weight
 
     def display_information(self) -> None:
-        """Overrides parent method: reuses parent display then appends weight."""
         super().display_information()
         print(f" | Weight: {self.__weight:.1f}kg")
 
+    def get_fulfilment_info(self) -> str:
+        """Fulfills abstract method from Product."""
+        return "Requires physical delivery to customer shipping address."
+
+    def calculate_shipping_cost(self) -> float:
+        """Fulfills abstract method from CanBeShipped interface ($5 base + $2.50/kg)."""
+        base_rate = 5.00
+        per_kg_rate = 2.50
+        return base_rate + (self.__weight * per_kg_rate)
+
     def to_dict(self) -> dict:
-        """Serializes physical product with its type and weight."""
         data = super().to_dict()
         data["type"] = "physical"
         data["weight"] = self.__weight
@@ -82,21 +101,21 @@ class PhysicalProduct(Product):
 
 class DigitalProduct(Product):
     def __init__(self, product_id: str, name: str, price: float, stock: int, download_size: float):
-        # Reuse parent constructor
         super().__init__(product_id, name, price, stock)
-        # Unique attribute for digital items (in MB)
         self.__download_size = float(download_size)
 
     def get_download_size(self) -> float:
         return self.__download_size
 
     def display_information(self) -> None:
-        """Overrides parent method: reuses parent display then appends download size."""
         super().display_information()
         print(f" | Download Size: {self.__download_size:.1f}MB")
 
+    def get_fulfilment_info(self) -> str:
+        """Fulfills abstract method from Product."""
+        return "Delivered digitally. Download link provided via email."
+
     def to_dict(self) -> dict:
-        """Serializes digital product with its type and download size."""
         data = super().to_dict()
         data["type"] = "digital"
         data["download_size"] = self.__download_size
