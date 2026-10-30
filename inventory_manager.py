@@ -27,8 +27,9 @@ class Product:
             print("Stock cannot be negative.")
 
     def display_information(self) -> None:
-        """Displays product details in a formatted line."""
-        print(f"ID: {self.__product_id} | Name: {self.__name} | Price: ${self.__price:.2f} | Stock: {self.__stock}")
+        """Displays product base details without trailing newline."""
+        print(f"ID: {self.__product_id} | Name: {self.__name} | Price: ${self.__price:.2f} | Stock: {self.__stock}", end="")
+
 
     # Public getters 
     def get_product_id(self) -> str:
@@ -51,6 +52,56 @@ class Product:
             "price": self.__price,
             "stock": self.__stock
         }
+
+
+# ==========================================
+# 2. SUBCLASSES: INHERITANCE & METHOD OVERRIDING
+# ==========================================
+class PhysicalProduct(Product):
+    def __init__(self, product_id: str, name: str, price: float, stock: int, weight: float):
+        # Reuse parent constructor
+        super().__init__(product_id, name, price, stock)
+        # Unique attribute for physical items (in kg)
+        self.__weight = float(weight)
+
+    def get_weight(self) -> float:
+        return self.__weight
+
+    def display_information(self) -> None:
+        """Overrides parent method: reuses parent display then appends weight."""
+        super().display_information()
+        print(f" | Weight: {self.__weight:.1f}kg")
+
+    def to_dict(self) -> dict:
+        """Serializes physical product with its type and weight."""
+        data = super().to_dict()
+        data["type"] = "physical"
+        data["weight"] = self.__weight
+        return data
+
+
+class DigitalProduct(Product):
+    def __init__(self, product_id: str, name: str, price: float, stock: int, download_size: float):
+        # Reuse parent constructor
+        super().__init__(product_id, name, price, stock)
+        # Unique attribute for digital items (in MB)
+        self.__download_size = float(download_size)
+
+    def get_download_size(self) -> float:
+        return self.__download_size
+
+    def display_information(self) -> None:
+        """Overrides parent method: reuses parent display then appends download size."""
+        super().display_information()
+        print(f" | Download Size: {self.__download_size:.1f}MB")
+
+    def to_dict(self) -> dict:
+        """Serializes digital product with its type and download size."""
+        data = super().to_dict()
+        data["type"] = "digital"
+        data["download_size"] = self.__download_size
+        return data
+
 
 # ==========================================
 # 2. INVENTORY CLASS
