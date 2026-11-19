@@ -9,7 +9,10 @@ except ImportError:
 class DigitalProduct(Product):
     def __init__(self, product_id: str, name: str, price: float, stock_quantity: int, download_size: float, supplier: Supplier):
         super().__init__(product_id, name, price, stock_quantity, supplier)
-        self.download_size: float = float(download_size)
+        size_val = float(download_size)
+        if size_val <= 0:
+            raise ValueError("Download size must be greater than zero.")
+        self.download_size: float = size_val
 
     def get_download_size(self) -> float:
         return self.download_size

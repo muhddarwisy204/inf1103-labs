@@ -6,8 +6,11 @@ except ImportError:
 
 class OrderLine:
     def __init__(self, product: Product, quantity: int):
+        qty = int(quantity)
+        if qty <= 0:
+            raise ValueError("Quantity must be greater than zero.")
         self.product: Product = product
-        self.quantity: int = int(quantity)
+        self.quantity: int = qty
 
     def calculate_subtotal(self) -> float:
         """Returns product price multiplied by the quantity."""

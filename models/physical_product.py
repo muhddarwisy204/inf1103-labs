@@ -11,7 +11,10 @@ except ImportError:
 class PhysicalProduct(Product, CanBeShipped):
     def __init__(self, product_id: str, name: str, price: float, stock_quantity: int, weight: float, supplier: Supplier):
         super().__init__(product_id, name, price, stock_quantity, supplier)
-        self.weight: float = float(weight)
+        weight_val = float(weight)
+        if weight_val <= 0:
+            raise ValueError("Weight must be greater than zero.")
+        self.weight: float = weight_val
 
     def get_weight(self) -> float:
         return self.weight

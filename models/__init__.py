@@ -6,6 +6,12 @@ from .digital_product import DigitalProduct
 from .inventory import Inventory
 from .order_line import OrderLine
 from .order import Order
+from .discount_strategy import DiscountStrategy
+from .no_discount import NoDiscount
+from .percentage_discount import PercentageDiscount
+from .bulk_discount import BulkDiscount
+from .student_discount import StudentDiscount
+from .product_factory import ProductFactory
 
 __all__ = [
     "CanBeShipped",
@@ -16,4 +22,10 @@ __all__ = [
     "Inventory",
     "OrderLine",
     "Order",
+    "DiscountStrategy",
+    "NoDiscount",
+    "PercentageDiscount",
+    "BulkDiscount",
+    "StudentDiscount",
+    "ProductFactory",
 ]
